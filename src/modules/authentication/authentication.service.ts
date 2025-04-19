@@ -1,5 +1,6 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { compareHash, doHashing } from 'src/shared/crypto';
+import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import {
   CookieCredentials,
@@ -9,11 +10,39 @@ import {
   JwtRefreshTokenPayload,
 } from './cookie.service';
 
+@Injectable()
 export class AuthenticationService {
   constructor(
     private readonly userService: UserService,
     private readonly cookieService: CookieService,
   ) {}
+
+  private generateCookies(userEntity: UserEntity): CookieCredentials {
+    return {
+      accessTokenCookie:
+        this.cookieService.generateAccessTokenCookie(userEntity),
+      refreshTokenCookie:
+        this.cookieService.generateRefreshTokenCookie(userEntity),
+    };
+  }
+
+  async signUp(userName: string, password: string): Promise<CookieCredentials> {
+    if (await this.userService.getUserByUserName(userName)) {
+      throw new BadRequestException(
+        'USER_ALREADY_EXISTS_ERROR',
+        `Username ${userName} already exist`,
+      );
+    }
+
+    const hashedPassword: string = await doHashing(password);
+
+    const userEntity = await this.userService.createUser(
+      userName,
+      hashedPassword,
+    );
+
+    return this.generateCookies(userEntity!);
+  }
 
   async authenticate(
     userName: string,
@@ -24,7 +53,7 @@ export class AuthenticationService {
     if (!userEntity) {
       console.log('❌ Failed to authenticate. User is not existing in DB', {
         userName,
-      });
+      }); // TODO: Change to loki
 
       throw new BadRequestException(
         'AUTHENTICATION_ERROR',
@@ -32,21 +61,14 @@ export class AuthenticationService {
       );
     }
 
-    const hashedPwd: string = await doHashing(password);
-
-    if (!(await compareHash(password, hashedPwd))) {
+    if (!(await compareHash(password, userEntity.hashedPassword))) {
       throw new BadRequestException(
         'AUTHENTICATION_ERROR',
         'Failed to authenticate with provided credentials',
       );
     }
 
-    return {
-      accessTokenCookie:
-        this.cookieService.generateAccessTokenCookie(userEntity),
-      refreshTokenCookie:
-        this.cookieService.generateRefreshTokenCookie(userEntity),
-    };
+    return this.generateCookies(userEntity);
   }
 
   async refresh(refreshTokenCookie: string): Promise<CookieCredentials> {
@@ -72,14 +94,8 @@ export class AuthenticationService {
         );
       }
 
-      return {
-        accessTokenCookie:
-          this.cookieService.generateAccessTokenCookie(userEntity),
-        refreshTokenCookie:
-          this.cookieService.generateRefreshTokenCookie(userEntity),
-      };
+      return this.generateCookies(userEntity);
     } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       console.log('❌ Token is unverified', { details: error });
 
       throw new BadRequestException(

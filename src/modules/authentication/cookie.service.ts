@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { ms } from 'ms';
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { BadRequestException } from '@nestjs/common';
+import * as ms from 'ms';
+
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as cookie from 'cookie';
 import * as jsonwebtoken from 'jsonwebtoken';
 import { DateTime } from 'luxon';
@@ -38,6 +35,7 @@ export interface CookieCredentials {
   refreshTokenCookie: string;
 }
 
+@Injectable()
 export class CookieService {
   private verifyAndParseJwtToken<T extends object>(token: string): T {
     return jsonwebtoken.verify(token, JWT_SECRET_KEY) as T;
@@ -91,7 +89,7 @@ export class CookieService {
         httpOnly: true,
         path: '/',
         expires: accessTokenExpiresAt.toJSDate(),
-        secure: true,
+        // secure: true,
         sameSite: 'none',
       },
     );
@@ -126,7 +124,7 @@ export class CookieService {
         httpOnly: true,
         path: '/',
         expires: refreshTokenExpiresAt.toJSDate(),
-        secure: true,
+        // secure: true,
         sameSite: 'none',
       },
     );
