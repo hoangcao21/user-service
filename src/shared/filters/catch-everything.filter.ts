@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 
@@ -21,6 +22,8 @@ export class CatchEverythingFilter implements ExceptionFilter {
     let httpStatus: number = HttpStatus.INTERNAL_SERVER_ERROR;
     let errorCode: string = 'UNEXPECTED_ERROR';
     let errorMessage: string | string[] = 'Unexpected Error';
+
+    Logger.error('Caught exception ', exception);
 
     if (exception instanceof HttpException) {
       httpStatus = exception.getStatus();
