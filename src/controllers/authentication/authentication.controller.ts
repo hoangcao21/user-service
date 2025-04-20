@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Res, UseGuards } from '@nestjs/common';
 
 import { Response } from 'express';
 import { AuthenticationService } from 'src/modules/authentication/authentication.service';
@@ -31,7 +31,7 @@ export class AuthenticationController {
       dto.password,
     );
 
-    // TODO: Add logging with loki grafana here to indicate Sign Up successfully
+    Logger.log('✅ Sign up successfully!', { details: dto });
 
     this.sendCookies(cookies, res);
   }
@@ -44,7 +44,7 @@ export class AuthenticationController {
     const cookies: CookieCredentials =
       await this.authenticationService.authenticate(dto.userName, dto.password);
 
-    // TODO: Add logging with loki grafana here to indicate Authenticate successfully
+    Logger.log('✅ Sign in successfully!', { details: dto });
 
     this.sendCookies(cookies, res);
   }
@@ -59,7 +59,7 @@ export class AuthenticationController {
     const cookies: CookieCredentials =
       await this.authenticationService.refresh(refreshToken);
 
-    // TODO: Add logging with loki grafana here to indicate Rotate successfully
+    Logger.log('✅ Rotate successfully!', { details: { refreshToken } });
 
     this.sendCookies(cookies, res);
   }

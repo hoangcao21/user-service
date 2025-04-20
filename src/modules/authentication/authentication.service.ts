@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { compareHash, doHashing } from 'src/shared/crypto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -51,9 +51,9 @@ export class AuthenticationService {
     const userEntity = await this.userService.getUserByUserName(userName);
 
     if (!userEntity) {
-      console.log('❌ Failed to authenticate. User is not existing in DB', {
+      Logger.log('❌ Failed to authenticate. User is not existing in DB', {
         userName,
-      }); // TODO: Change to loki
+      });
 
       throw new BadRequestException(
         'AUTHENTICATION_ERROR',
@@ -84,7 +84,7 @@ export class AuthenticationService {
       );
 
       if (!userEntity) {
-        console.log('❌ Failed to authenticate. User is not existing in DB', {
+        Logger.log('❌ Failed to authenticate. User is not existing in DB', {
           userName: refreshTokenPayload.userName,
         });
 
@@ -96,7 +96,7 @@ export class AuthenticationService {
 
       return this.generateCookies(userEntity);
     } catch (error) {
-      console.log('❌ Token is unverified', { details: error });
+      Logger.log('❌ Token is unverified', { details: error });
 
       throw new BadRequestException(
         'INVALID_TOKEN_ERROR',
