@@ -32,7 +32,11 @@ export class LokiLogger extends ConsoleLogger {
     })
       .then()
       .catch((error) => {
-        console.error('error', error.message, error?.response?.data);
+        console.error(
+          '[Loki Logger] Raw error',
+          error.message,
+          error?.response?.data,
+        );
       });
   };
 
