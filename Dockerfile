@@ -22,7 +22,10 @@ COPY --from=builder /usr/src/app/dist ./dist
 
 COPY --from=builder /usr/src/app/.env ./.env
 
+COPY --from=builder /usr/src/app/tsconfig.json ./tsconfig.json
+COPY --from=builder /usr/src/app/tsconfig.build.json ./tsconfig.build.json
+
 EXPOSE 3001
 
 # Command to run the application
-CMD ["node", "dist/main"]
+CMD yarn db-migration:run && node dist/main

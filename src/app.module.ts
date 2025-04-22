@@ -10,6 +10,7 @@ import { dataSourceOptions } from './shared/database/data-source';
 import { CatchEverythingFilter } from './shared/filters/catch-everything.filter';
 import { ApiResponseInterceptor } from './shared/interceptors/api-response.interceptor';
 import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
+import { EventConsumerModule } from './consumers/event-consumer.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
       },
       isGlobal: true,
     }),
+    EventConsumerModule,
   ],
   controllers: [],
   providers: [
